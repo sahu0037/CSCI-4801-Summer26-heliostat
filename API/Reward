@@ -29,4 +29,4 @@ JSON
   "remainingBalance": 100
 }
 
-If you re-run a GET http://localhost:8080/api/rewards, the catalog state on disk will accurately reflect that stock dropped from 5 to 4. 
+If you re-run a GET http://localhost:8080/api/rewards, the catalog state on disk will accurately reflect that stock dropped from 5 to 4.

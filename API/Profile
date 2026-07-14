@@ -43,3 +43,60 @@ Response
     ],
     "active": true
 }
+
+3: The Multi-Role Override (Edge Case)
+A parent can be an OWNER, a MANAGER, and a PERFORMER all at once (so they can assign a task to themselves and earn points). Let's test if the system accurately preserves a complex role array configuration on disk.
+The Request:
+POST http://localhost:8080/api/profiles
+
+     {
+       "id": "super-parent",
+       "name": "Alex",
+       "pinHash": "secure_hash",
+       "balance": 500,
+       "active": true,
+       "roles": ["OWNER", "MANAGER", "PERFORMER"]
+     }
+
+What to check:
+Run a GET request for id=super-parent. Verify that the roles array retains all three roles exactly, and didn't accidentally overwrite or drop them down to just one string.
+
+
+4: Reading a Non-Existent Profile (Error Handling)
+What happens if an API client requests an ID that doesn't exist on disk? The server should handle this gracefully without throwing a dirty Java stack trace (500 Internal Server Error) back to the client.
+The Request:
+
+ GET "http://localhost:8080/api/profiles?id=ghost-user"
+What to check:
+Verify that the terminal running Gradle doesn't crash, and that the API client receives a clean 404 Not Found status code with the JSON body:
+JSON Response
+{"error": "Profile not found"}
+
+
+5: The Data Persistence Longevity Test
+
+This is the ultimate test for your file system repository. We need to make sure data survives a complete server shutdown.
+Step-by-Step Execution:
+Create a user via a POST request (e.g., "id": "test-survival").
+Go to your running Gradle terminal and shut down the server using Ctrl + C.
+Verify the server is completely dead (try to ping http://localhost:8080/—it should fail).
+Restart the server: ./gradlew run
+Send a GET request for the user:
+Bash
+curl -X GET "http://localhost:8080/api/profiles?id=test-survival"
+What to check:
+The profile data should load instantly. If it does, you have successfully decoupled your data storage from the application's RAM lifecycle.
+
+
+6: Malformed JSON Payloads (Robustness)
+What happens if a client sends invalid JSON (e.g., a missing brace, a typo in a data type like passing a text string into the balance integer field)?
+The Request:
+
+POST http://localhost:8080/api/profiles
+{
+       "id": "broken-json",
+       "balance": "One Hundred Points"
+     }'
+
+What to check:
+Jackson should automatically catch this type-mismatch error. Verify that your server returns a structured 400 Bad Request or 500 error payload explaining that "One Hundred Points" cannot be deserialized into an int, rather than swallowing the error or freezing the HTTP thread pool.
