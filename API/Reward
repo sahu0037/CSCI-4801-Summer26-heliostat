@@ -1,0 +1,32 @@
+
+1. Setup a Catalog Item (POST /api/rewards)
+JSON
+// POST http://localhost:8080/api/rewards
+{
+  "id": "reward-screentime",
+  "title": "1 Hour Screen Time",
+  "description": "Unlock video games or streaming on the living room TV.",
+  "costPoints": 100,
+  "stock": 5
+}
+Expected Response (201 Created): Returns the saved reward layout object.
+
+
+2. Execute a Purchase (POST with Query Action)
+Let’s simulate a performer user checking out this item from the catalog storefront.
+
+Plaintext
+POST http://localhost:8080/api/rewards?action=purchase&id=reward-screentime&userId=child-timmy
+
+Scenario A (Timmy doesn't have 100 points):
+JSON
+{"error": "Transaction Denied: Insufficient ledger balance. Need 100 points, but only have 40."}
+
+Scenario B (Timmy has enough points):
+JSON
+{
+  "message": "Purchase successful! Deducted 100 credits from Timmy Smith.",
+  "remainingBalance": 100
+}
+
+If you re-run a GET http://localhost:8080/api/rewards, the catalog state on disk will accurately reflect that stock dropped from 5 to 4. 

@@ -1,4 +1,7 @@
 
+
+1. Create Profile
+
 Post : http://localhost:8080/api/profiles
 
 Request
@@ -25,6 +28,7 @@ Response
     "active": true
 }
 
+2. View profile
 
 Get : http://localhost:8080/api/profiles?id=child-timmy
 

@@ -1,0 +1,94 @@
+
+1. Create Task
+Action: A user with a MANAGER or OWNER role creates a new available chore blueprint.
+HTTP Endpoint: POST /api/tasks
+Request Payload
+
+
+{
+  "id": "task-clean-garage",
+  "title": "Organize and Clean Garage",
+  "description": "Sweep floors, break down cardboard boxes, and rack tools.",
+  "rewardPoints": 150,
+  "managerId": "parent-alex"
+}
+
+Expected Response
+
+{
+  "id": "task-clean-garage",
+  "title": "Organize and Clean Garage",
+  "description": "Sweep floors, break down cardboard boxes, and rack tools.",
+  "rewardPoints": 150,
+  "managerId": "parent-alex",
+  "performerId": null,
+  "status": "AVAILABLE"
+}
+
+2. Claim Task
+
+Action: A user with a PERFORMER role claims the open chore.
+HTTP Endpoint: POST /api/tasks?action=claim&id=task-clean-garage&userId=child-timmy
+Request Body: Leave empty
+
+
+Expected Response (200 OK)
+JSON
+{
+  "message": "Task successfully assigned to Timmy Smith",
+  "task": {
+    "id": "task-clean-garage",
+    "title": "Organize and Clean Garage",
+    "description": "Sweep floors, break down cardboard boxes, and rack tools.",
+    "rewardPoints": 150,
+    "managerId": "parent-alex",
+    "performerId": "child-timmy",
+    "status": "ASSIGNED"
+  }
+}
+
+3. Submit Task for Review
+Action: The assigned performer completes the work and submits it for approval.
+HTTP Endpoint: POST /api/tasks?action=submit&id=task-clean-garage&userId=child-timmy
+Request Body: Leave empty
+Expected Response (200 OK)
+JSON
+{
+  "message": "Task marked completed. Awaiting manager approval."
+}
+
+4. Verify Task & Release Points
+Action: The manager reviews the work, closes the task, and releases the points to the child's balance.
+HTTP Endpoint: POST /api/tasks?action=verify&id=task-clean-garage&userId=parent-alex
+Request Body: Leave empty
+Expected Response (200 OK)
+JSON
+{
+  "message": "Task approved. Transferred 150 credits to Timmy Smith."
+}
+
+5. Final State Verification (GET Requests)
+ verify the data persistence state changes on disk by sending quick GET requests to check the final statuses.
+Fetch Task State (GET /api/tasks?id=task-clean-garage)
+JSON
+{
+  "id": "task-clean-garage",
+  "title": "Organize and Clean Garage",
+  "description": "Sweep floors, break down cardboard boxes, and rack tools.",
+  "rewardPoints": 150,
+  "managerId": "parent-alex",
+  "performerId": "child-timmy",
+  "status": "APPROVED"
+}
+
+6. Fetch Updated Performer Profile (GET /api/profiles?id=child-timmy)
+(Assuming child-timmy started with a baseline balance of 50 credits before the final verification).
+JSON
+{
+  "id": "child-timmy",
+  "name": "Timmy Smith",
+  "pinHash": "$2a$12$ScrambledTextHere",
+  "balance": 200,
+  "roles": ["PERFORMER"],
+  "active": true
+}
