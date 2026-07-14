@@ -1,0 +1,28 @@
+
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group = 'com.heliostat'
+version = '0.5-SNAPSHOT'
+
+
+application {
+    mainClass = 'com.heliostat.engine.ProfileApiServer'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+
+    testImplementation platform('org.junit:junit-bom:5.11.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

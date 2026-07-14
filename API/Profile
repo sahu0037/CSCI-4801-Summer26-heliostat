@@ -1,0 +1,41 @@
+
+Post : http://localhost:8080/api/profiles
+
+Request
+
+{
+  "id": "child-timmy",
+  "name": "Timmy Smith",
+  "pinHash": "$2a$12$ScrambledTextHere",
+  "balance": 50,
+  "active": true,
+  "roles": ["PERFORMER"]
+}
+
+
+Response
+{
+    "id": "child-timmy",
+    "name": "Timmy Smith",
+    "pinHash": "$2a$12$ScrambledTextHere",
+    "balance": 50,
+    "roles": [
+        "PERFORMER"
+    ],
+    "active": true
+}
+
+
+Get : http://localhost:8080/api/profiles?id=child-timmy
+
+Response
+{
+    "id": "child-timmy",
+    "name": "Timmy Smith",
+    "pinHash": "$2a$12$ScrambledTextHere",
+    "balance": 50,
+    "roles": [
+        "PERFORMER"
+    ],
+    "active": true
+}
