@@ -245,17 +245,51 @@ public class ProfileApiServer {
 
                 sendText(exchange, 200, "{\"message\": \"Task successfully assigned to " + user.getName() + "\", \"task\": " + mapper.writeValueAsString(task) + "}");
 
-            } else if ("submit".equalsIgnoreCase(action)) {
-                // Performer marks work complete
+            }
+            if ("submit".equalsIgnoreCase(action)) {
                 if (!user.getId().equals(task.getPerformerId())) {
-                    sendText(exchange, 403, "{\"error\": \"Access Denied: You are not the assigned performer for this task.\"}");
+                    sendText(exchange, 403, "{\"error\": \"Access Denied: You are not assigned to this task.\"}");
                     return;
                 }
-                task.setStatus(Task.Status.SUBMITTED);
-                taskRepository.save(task);
-                sendText(exchange, 200, "{\"message\": \"Task marked completed. Awaiting manager approval.\"}");
+
+                // FR-MGR-01: Check if Immediate Confirmation is enabled
+                if (!task.isRequiresReview()) {
+                    // Bypass review stage and pay out immediately
+                    user.setBalance(user.getBalance() + task.getRewardPoints());
+                    repository.save(user);
+
+                    handleTaskCompletionLifecycle(task);
+                    sendText(exchange, 200, "{\"message\": \"Task completed with Immediate Confirmation. "
+                            + task.getRewardPoints() + " points awarded!\"}");
+                } else {
+                    // Move to review queue
+                    task.setStatus(Task.Status.SUBMITTED);
+                    taskRepository.save(task);
+                    sendText(exchange, 200, "{\"message\": \"Task submitted for Parental Review.\"}");
+                }
 
             } else if ("verify".equalsIgnoreCase(action)) {
+                // ... Manager verification rule checks ...
+
+                if (!user.getRoles().contains(UserProfile.Role.MANAGER)) {
+                    sendText(exchange, 403, "{\"error\": \"Access Denied: Only managers can verify tasks and award points.\"}");
+                    return;
+                }
+                if (task.getStatus() != Task.Status.SUBMITTED) {
+                    sendText(exchange, 400, "{\"error\": \"Task must be in SUBMITTED state to be verified.\"}");
+                    return;
+                }
+                // Award Points
+                UserProfile performer = repository.findById(task.getPerformerId())
+                        .orElseThrow(() -> new IllegalArgumentException("Performer profile not found."));
+                performer.setBalance(performer.getBalance() + task.getRewardPoints());
+                repository.save(performer);
+
+                handleTaskCompletionLifecycle(task);
+                sendText(exchange, 200, "{\"message\": \"Task verified and approved. Transferred "
+                        + task.getRewardPoints() + " credits.\"}");
+            }
+             /*else if ("verify".equalsIgnoreCase(action)) {
                 // RULE: Only MANAGER/OWNER can verify, and they release the reward points
                 if (!user.getRoles().contains(UserProfile.Role.MANAGER)) {
                     sendText(exchange, 403, "{\"error\": \"Access Denied: Only managers can verify tasks and award points.\"}");
@@ -277,9 +311,22 @@ public class ProfileApiServer {
                 taskRepository.save(task);
 
                 sendText(exchange, 200, "{\"message\": \"Task approved. Transferred " + task.getRewardPoints() + " credits to " + performer.getName() + ".\"}");
-            } else {
+            }*/ else {
                 sendText(exchange, 400, "{\"error\": \"Unknown execution action syntax.\"}");
             }
+        }
+
+        // HELPER METHOD FOR SCHEDULING LIFECYCLE
+        private static void handleTaskCompletionLifecycle(Task task) {
+            if (task.getRecurrence() != null && task.getRecurrence() != Task.RecurrencePattern.NONE) {
+                // REPEATABLE TASK: Reset back to AVAILABLE for the next cycle
+                task.setStatus(Task.Status.AVAILABLE);
+                task.setPerformerId(null);
+            } else {
+                // ONE-TIME TASK: Mark completed/approved
+                task.setStatus(Task.Status.APPROVED);
+            }
+            taskRepository.save(task);
         }
 
         private void handleReadTasks(HttpExchange exchange) throws IOException {

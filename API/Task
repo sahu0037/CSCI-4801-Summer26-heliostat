@@ -10,7 +10,9 @@ Request Payload
   "title": "Organize and Clean Garage",
   "description": "Sweep floors, break down cardboard boxes, and rack tools.",
   "rewardPoints": 150,
-  "managerId": "parent-alex"
+  "managerId": "parent-alex",
+  "requiresReview": true,
+  "recurrence": "NONE"
 }
 
 Expected Response
@@ -91,4 +93,17 @@ JSON
   "balance": 200,
   "roles": ["PERFORMER"],
   "active": true
+}
+
+7. Creating a Scheduled Daily Task (POST /api/tasks)
+JSON
+{
+  "id": "chore-brush-teeth",
+  "title": "Brush Teeth",
+  "description": "Brush teeth for 2 minutes morning and night.",
+  "rewardPoints": 10,
+  "managerId": "parent-alex",
+  "requiresReview": false,
+  "dueDate": "2026-07-20",
+  "recurrence": "DAILY"
 }

@@ -13,6 +13,10 @@ public class Task implements Serializable {
     private String performerId; // The profile ID assigned to do the work (can be null initially)
     private Status status;
 
+    private boolean requiresReview; // true = Parental Review Required, false = Immediate Confirmation
+    private String dueDate;        // ISO Format: "YYYY-MM-DD" or "YYYY-MM-DDTHH:mm:ss"
+    private RecurrencePattern recurrence;
+
     public enum Status {
         AVAILABLE,   // Created, open for anyone to claim
         ASSIGNED,    // In progress by a specific performer
@@ -20,6 +24,12 @@ public class Task implements Serializable {
         APPROVED     // Verified, points paid out (terminal state)
     }
 
+    public enum RecurrencePattern {
+        NONE,      // One-time task
+        DAILY,     // Repeats every day
+        WEEKLY,    // Repeats every 7 days
+        MONTHLY    // Repeats monthly
+    }
     // CRITICAL: Empty constructor for Jackson JSON mapping
     public Task() {}
 
@@ -53,4 +63,13 @@ public class Task implements Serializable {
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }
+
+    public boolean isRequiresReview() { return requiresReview; }
+    public void setRequiresReview(boolean requiresReview) { this.requiresReview = requiresReview; }
+
+    public String getDueDate() { return dueDate; }
+    public void setDueDate(String dueDate) { this.dueDate = dueDate; }
+
+    public RecurrencePattern getRecurrence() { return recurrence; }
+    public void setRecurrence(RecurrencePattern recurrence) { this.recurrence = recurrence; }
 }
