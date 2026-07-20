@@ -96,12 +96,6 @@ heliostat-engine/
 
 ---
 
-```
-
-
-
----
-
 ## 🧪 Quick Test Guide (API Lifecycle)
 
 You can test the entire Task & Reward lifecycle using `curl` commands in a second terminal window. or use API Client Postman
