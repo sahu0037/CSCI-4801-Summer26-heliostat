@@ -46,8 +46,9 @@ Response
 
 3: The Multi-Role Override (Edge Case)
 A parent can be an OWNER, a MANAGER, and a PERFORMER all at once (so they can assign a task to themselves and earn points). Let's test if the system accurately preserves a complex role array configuration on disk.
-The Request:
-POST http://localhost:8080/api/profiles
+
+Request:
+POST:  http://localhost:8080/api/profiles
 
      {
        "id": "super-parent",
