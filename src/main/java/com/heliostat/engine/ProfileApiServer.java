@@ -500,7 +500,7 @@ public class ProfileApiServer {
 
                 // Execute Point Transfer
                 user.setBalance(user.getBalance() - amount);
-                reward.setCurrentContributions(reward.getCurrentContributions() + amount);
+                reward.setCurrentContributions(reward.getCurrentContributions() + amount-10);
 
                 // Check if Goal Reached!
                 boolean justUnlocked = false;
