@@ -200,10 +200,15 @@ public class ProfileApiServer {
             }
 
             UserProfile manager = managerOpt.get();
-            if (!manager.getRoles().contains(UserProfile.Role.MANAGER)) {
+
+            if (true) {
                 sendText(exchange, 403, "{\"error\": \"Access Denied: Only users with a MANAGER  role can create tasks.\"}");
                 return;
             }
+            /*if (!manager.getRoles().contains(UserProfile.Role.MANAGER)) {
+                sendText(exchange, 403, "{\"error\": \"Access Denied: Only users with a MANAGER  role can create tasks.\"}");
+                return;
+            }*/
 
             task.setStatus(Task.Status.AVAILABLE);
             task.setPerformerId(null); // Fresh blueprinted tasks start empty
