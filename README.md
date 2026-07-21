@@ -100,14 +100,18 @@ heliostat-engine/
 
 You can test the entire Task & Reward lifecycle using `curl` commands in a second terminal window. or use API Client Postman
 
-### Step 1: Login
+### Step 1: Create Profile 
 
 ```bash
 curl -X POST http://localhost:8080/api/login \
      -H "Content-Type: application/json" \
      -d '{
-       "id": "parent-alex",
-       "pin": "1234"
+        "id": "parent-alex",
+        "name": "alex Smith",
+        "pinHash": "$2a$12$ScrambledTextHere",
+        "balance": 50,
+        "active": true,
+        "roles": ["MANAGER"]
      }'
 
 ```

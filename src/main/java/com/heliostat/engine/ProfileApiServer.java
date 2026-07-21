@@ -388,7 +388,7 @@ public class ProfileApiServer {
 
             try {
                 if ("POST".equals(method)) {
-                    if (query != null && query.contains("action=purchase")) {
+                    if (query != null && (query.contains("action=purchase") || query.contains("action=contribute"))) {
                         handlePurchaseReward(exchange, query);
                     } else {
                         handleCreateReward(exchange);
