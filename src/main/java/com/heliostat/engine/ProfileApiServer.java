@@ -415,6 +415,8 @@ public class ProfileApiServer {
         // TRANSACTION ENGINE RULE: Deduct points from profile if balance allows, reduce item stock
         private void handlePurchaseReward(HttpExchange exchange, String query) throws IOException {
             Map<String, String> params = parseQuery(query);
+            String action = params.get("action");
+            if ("purchase".equalsIgnoreCase(action)) {
             String rewardId = params.get("id");
             String userId = params.get("userId");
 
@@ -427,6 +429,20 @@ public class ProfileApiServer {
             UserProfile user = repository.findById(userId) // accessing global Profile repository
                     .orElseThrow(() -> new IllegalArgumentException("Target purchasing user profile not found."));
 
+            //  Check Reward Type & Targeted Eligibility
+            if (reward.getType() == Reward.RewardType.INDIVIDUAL) {
+                // If targeted to a specific performer, ensure only that performer can purchase it
+                if (reward.getTargetProfileId() != null && !reward.getTargetProfileId().equals(user.getId())) {
+                    sendText(exchange, 403, "{\"error\": \"Access Denied: This individual reward is assigned to another performer.\"}");
+                    return;
+                }
+            } else if (reward.getType() == Reward.RewardType.GROUP) {
+                // GROUP REWARD RULE: Check group membership or handle group pool balance
+                // (Ensure the user belongs to reward.getTargetGroupId())
+                if (reward.getTargetGroupId() != null) {
+                    // Validation check for group assignment
+                }
+            }
             // Check Inventory Stock
             if (reward.getStock() == 0) {
                 sendText(exchange, 400, "{\"error\": \"Transaction Denied: This reward is completely out of stock.\"}");
@@ -451,6 +467,62 @@ public class ProfileApiServer {
 
             sendText(exchange, 200, "{\"message\": \"Purchase successful! Deducted " + reward.getCostPoints()
                     + " credits from " + user.getName() + ".\", \"remainingBalance\": " + user.getBalance() + "}");
+
+            }
+
+            if ("contribute".equalsIgnoreCase(action)) {
+                String rewardId = params.get("id");
+                String userId = params.get("userId");
+                int amount = Integer.parseInt(params.get("amount")); // Points to contribute
+
+                Reward reward = rewardRepository.findById(rewardId)
+                        .orElseThrow(() -> new IllegalArgumentException("Group reward not found."));
+                UserProfile user = repository.findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("User profile not found."));
+
+                // Validation 1: Must be a GROUP reward
+                if (reward.getType() != Reward.RewardType.GROUP) {
+                    sendText(exchange, 400, "{\"error\": \"Cannot contribute to an Individual Reward.\"}");
+                    return;
+                }
+
+                // Validation 2: Check if already fully funded
+                if (reward.isClaimed()) {
+                    sendText(exchange, 400, "{\"error\": \"This group reward has already been claimed!\"}");
+                    return;
+                }
+
+                // Validation 3: Check Performer balance
+                if (user.getBalance() < amount) {
+                    sendText(exchange, 400, "{\"error\": \"Insufficient balance to make this contribution.\"}");
+                    return;
+                }
+
+                // Execute Point Transfer
+                user.setBalance(user.getBalance() - amount);
+                reward.setCurrentContributions(reward.getCurrentContributions() + amount);
+
+                // Check if Goal Reached!
+                boolean justUnlocked = false;
+                if (reward.getCurrentContributions() >= reward.getCostPoints()) {
+                    reward.setClaimed(true);
+                    if (reward.getStock() > 0) reward.setStock(reward.getStock() - 1);
+                    justUnlocked = true;
+                }
+
+                // Save Updates to Disk
+                repository.save(user);
+                rewardRepository.save(reward);
+
+                String statusMsg = justUnlocked
+                        ? "🎉 Goal Reached! Group Reward UNLOCKED for everyone!"
+                        : "Contribution saved. Progress: " + reward.getCurrentContributions() + "/" + reward.getCostPoints();
+
+                sendText(exchange, 200, "{\"message\": \"" + statusMsg + "\", \"userRemainingBalance\": " + user.getBalance() + "}");
+            }
+
+
+
         }
 
         private Map<String, String> parseQuery(String query) {

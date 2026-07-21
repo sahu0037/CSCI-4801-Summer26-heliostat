@@ -30,3 +30,52 @@ JSON
 }
 
 If you re-run a GET http://localhost:8080/api/rewards, the catalog state on disk will accurately reflect that stock dropped from 5 to 4.
+
+
+3. Example A: Creating an Individual Reward (POST /api/rewards)
+An individual reward assigned exclusively to child-timmy:
+JSON
+{
+  "id": "reward-timmy-bike",
+  "title": "New Bicycle",
+  "description": "Red mountain bike.",
+  "costPoints": 500,
+  "stock": 1,
+  "type": "INDIVIDUAL",
+  "targetProfileId": "child-timmy"
+}
+
+4. Example B: Creating a Group Reward (POST /api/rewards)
+A shared group reward assigned to the entire kids' group (e.g., a family trip to a theme park):
+JSON
+{
+  "id": "reward-disney-trip",
+  "title": "Family Waterpark Pass",
+  "description": "Day pass to the waterpark for the whole family.",
+  "costPoints": 1000,
+  "stock": 1,
+  "type": "GROUP",
+  "targetGroupId": "group-all-kids"
+}
+
+5. Performers Contribute Points (POST /api/rewards)
+Timmy contributes 300 points to the Waterpark Pass:
+Plaintext
+POST http://localhost:8080/api/rewards?action=contribute&id=reward-waterpark&userId=child-timmy&amount=300
+Response:
+JSON
+{
+  "message": "Contribution saved. Progress: 300/1000",
+  "userRemainingBalance": 50
+}
+
+6. Final Contribution Unlocks Reward
+Sarah contributes the remaining 700 points:
+Plaintext
+POST http://localhost:8080/api/rewards?action=contribute&id=reward-waterpark&userId=child-sarah&amount=700
+Response:
+JSON
+{
+  "message": "🎉 Goal Reached! Group Reward UNLOCKED for everyone!",
+  "userRemainingBalance": 100
+}

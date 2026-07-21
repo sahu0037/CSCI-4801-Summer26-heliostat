@@ -11,6 +11,19 @@ public class Reward implements Serializable {
     private int costPoints;     // How many credits it costs to purchase
     private int stock;           // Inventory remaining (-1 can represent infinite stock)
 
+    private RewardType type;        // INDIVIDUAL or GROUP
+    private String targetProfileId; // Used if type == INDIVIDUAL (null means open to all performers)
+    private String targetGroupId;   // Used if type == GROUP (e.g., "kids-group", "family-all")
+
+    // Group Contribution Tracking
+    private int currentContributions; // Track total points pooled so far
+    private boolean claimed;
+
+    public enum RewardType {
+        INDIVIDUAL,
+        GROUP
+    }
+
     // Mandatory empty constructor for Jackson
     public Reward() {}
 
@@ -20,6 +33,7 @@ public class Reward implements Serializable {
         this.description = description;
         this.costPoints = costPoints;
         this.stock = stock;
+        this.type = type;
     }
 
     // Getters and Setters
@@ -37,4 +51,22 @@ public class Reward implements Serializable {
 
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }
+
+    public RewardType getType() { return type; }
+    public void setType(RewardType type) { this.type = type; }
+
+    public String getTargetProfileId() { return targetProfileId; }
+    public void setTargetProfileId(String targetProfileId) { this.targetProfileId = targetProfileId; }
+
+    public String getTargetGroupId() { return targetGroupId; }
+    public void setTargetGroupId(String targetGroupId) { this.targetGroupId = targetGroupId; }
+
+    public int getCurrentContributions() { return currentContributions; }
+    public void setCurrentContributions(int currentContributions) {
+        this.currentContributions = currentContributions;
+    }
+
+    public boolean isClaimed() { return claimed; }
+    public void setClaimed(boolean claimed) { this.claimed = claimed; }
+
 }
