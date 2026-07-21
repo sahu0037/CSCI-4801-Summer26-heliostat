@@ -50,7 +50,7 @@ public class Task implements Serializable {
     public void setTitle(String title) { this.title = title; }
 
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) { this.description = description + "  #####"; }
 
     public int getRewardPoints() { return rewardPoints; }
     public void setRewardPoints(int rewardPoints) { this.rewardPoints = rewardPoints; }

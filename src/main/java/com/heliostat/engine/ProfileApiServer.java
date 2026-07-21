@@ -119,7 +119,7 @@ public class ProfileApiServer {
                 String id = query.split("=")[1];
                 Optional<UserProfile> profile = repository.findById(id);
                 if (profile.isPresent()) {
-                    sendResponse(exchange, 200, objectMapper.writeValueAsString(profile.get()));
+                    sendResponse(exchange, 200, objectMapper.writeValueAsString(profile.get()).toLowerCase());
                 } else {
                     sendResponse(exchange, 404, "{\"error\": \"Profile not found\"}");
                 }
@@ -189,7 +189,7 @@ public class ProfileApiServer {
             }
         }
 
-        // RULE: Only MANAGER or OWNER can create tasks
+        // RULE: Only MANAGER  can create tasks
         private void handleCreateTask(HttpExchange exchange) throws IOException {
             Task task = mapper.readValue(exchange.getRequestBody(), Task.class);
 
@@ -289,29 +289,7 @@ public class ProfileApiServer {
                 sendText(exchange, 200, "{\"message\": \"Task verified and approved. Transferred "
                         + task.getRewardPoints() + " credits.\"}");
             }
-             /*else if ("verify".equalsIgnoreCase(action)) {
-                // RULE: Only MANAGER/OWNER can verify, and they release the reward points
-                if (!user.getRoles().contains(UserProfile.Role.MANAGER)) {
-                    sendText(exchange, 403, "{\"error\": \"Access Denied: Only managers can verify tasks and award points.\"}");
-                    return;
-                }
-                if (task.getStatus() != Task.Status.SUBMITTED) {
-                    sendText(exchange, 400, "{\"error\": \"Task must be in SUBMITTED state to be verified.\"}");
-                    return;
-                }
-
-                // Pay Out Points to Performer File
-                UserProfile performer = repository.findById(task.getPerformerId())
-                        .orElseThrow(() -> new IllegalArgumentException("Performer profile went missing from disk."));
-
-                performer.setBalance(performer.getBalance() + task.getRewardPoints());
-                repository.save(performer); // Overwrites point ledger balance on disk
-
-                task.setStatus(Task.Status.APPROVED);
-                taskRepository.save(task);
-
-                sendText(exchange, 200, "{\"message\": \"Task approved. Transferred " + task.getRewardPoints() + " credits to " + performer.getName() + ".\"}");
-            }*/ else {
+            else {
                 sendText(exchange, 400, "{\"error\": \"Unknown execution action syntax.\"}");
             }
         }
@@ -444,10 +422,10 @@ public class ProfileApiServer {
                 }
             }
             // Check Inventory Stock
-            if (reward.getStock() == 0) {
-                sendText(exchange, 400, "{\"error\": \"Transaction Denied: This reward is completely out of stock.\"}");
-                return;
-            }
+            //if (reward.getStock() == 0) {
+            //    sendText(exchange, 400, "{\"error\": \"Transaction Denied: This reward is completely out of stock.\"}");
+            //    return;
+            //}
 
             // Check Financial Liquidity Balance
             if (user.getBalance() < reward.getCostPoints()) {
@@ -460,10 +438,10 @@ public class ProfileApiServer {
             user.setBalance(user.getBalance() - reward.getCostPoints());
             repository.save(user);
 
-            if (reward.getStock() > 0) { // Keep track if not infinite stock (-1)
+           // if (reward.getStock() > 0) { // Keep track if not infinite stock (-1)
                 reward.setStock(reward.getStock() - 1);
                 rewardRepository.save(reward);
-            }
+            //}
 
             sendText(exchange, 200, "{\"message\": \"Purchase successful! Deducted " + reward.getCostPoints()
                     + " credits from " + user.getName() + ".\", \"remainingBalance\": " + user.getBalance() + "}");

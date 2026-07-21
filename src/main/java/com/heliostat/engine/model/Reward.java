@@ -44,7 +44,7 @@ public class Reward implements Serializable {
     public void setTitle(String title) { this.title = title; }
 
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setDescription(String description) { this.description = description + " $$$$$$$$"; }
 
     public int getCostPoints() { return costPoints; }
     public void setCostPoints(int costPoints) { this.costPoints = costPoints; }
