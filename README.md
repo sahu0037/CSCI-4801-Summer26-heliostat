@@ -103,7 +103,7 @@ You can test the entire Task & Reward lifecycle using `curl` commands in a secon
 ### Step 1: Create Profile 
 
 ```bash
-curl -X POST http://localhost:8080/api/login \
+curl -X POST http://localhost:8080/api/profiles \
      -H "Content-Type: application/json" \
      -d '{
         "id": "parent-alex",
