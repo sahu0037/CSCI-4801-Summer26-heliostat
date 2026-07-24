@@ -10,7 +10,7 @@ This project uses a zero-external-database design—all persistent data is saved
 
 Before you begin, ensure you have the following installed on your machine:
 
-- **Java Development Kit (JDK):** Version 17 or higher
+- **Java Development Kit (JDK):** Version 11 or higher
 - **Git:** For cloning and version control
 - **Terminal / Shell:**
   - **macOS / Linux:** Terminal or Zsh
